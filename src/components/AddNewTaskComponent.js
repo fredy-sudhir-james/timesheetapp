@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal, Typography, Box, Stack, TextField, TextareaAutosize } from '@mui/material';
 import { Close } from '@mui/icons-material';
+import Stopwatch from "./Stopwatch";
 
 function AddNewTask(props) {
 	const [open, setOpen] = React.useState(false);
@@ -18,6 +19,12 @@ function AddNewTask(props) {
 		}
 		props.createTask(formData);
 		setOpen(false);
+	}
+
+	const handleStopwatchTimer = ( time ) => {
+		let hours = time / 60
+		let roundedHours = Math.ceil(hours * 4) / 4;
+		document.getElementById('hours').value = roundedHours
 	}
 
 	return(
@@ -64,9 +71,10 @@ function AddNewTask(props) {
 							InputLabelProps={{
 								shrink: true,
 							}}
+							defaultValue={localISOTime}
 						/>
 						<TextareaAutosize
-							aria-label="minimum height"
+							aria-label="Task description"
 							minRows={4}
 							placeholder="Add task description"
 							name="task"
@@ -82,10 +90,12 @@ function AddNewTask(props) {
 								min: 0,
 								step: "0.25"
 							}}
+							helperText="Add in increments of 0.25"
 							name="hours"
-							defaultValue={0.25}
+							defaultValue={0}
 							>
 						</TextField>
+						<Stopwatch timerAddition={handleStopwatchTimer}/>
 						<Button variant="contained" type="submit">Save</Button>
 					</Stack>
 				</Box>

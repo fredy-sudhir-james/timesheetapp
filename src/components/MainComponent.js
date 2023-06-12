@@ -5,7 +5,7 @@ import Header from "./HeaderComponent";
 import Home from "./HomeComponent";
 import Edit from "./EditComponent";
 import AllTasks from "./AllTasksComponent";
-import { Box, Container } from '@mui/material';
+import { Box, Container, Alert, Snackbar } from '@mui/material';
 import { teal } from '@mui/material/colors';
 import { Routes, Route } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -27,12 +27,15 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 function Main(props) {
+	const [open, setOpen] = React.useState(true);
+
+	const handleClose = () => {
+		setOpen(false);
+	};
 
 	React.useEffect(() => {
 		props.fetchTasks();
 	}, []);
-
-	console.log(props);
 
 	const EditWithID = () => {
 		let params = useParams();
@@ -66,6 +69,12 @@ function Main(props) {
 		<Box className="app" sx={boxStyle} py={5}>
 			<Container maxWidth='md' sx={containerStyle}>
 				<Header />
+				{
+					props.errMessage &&
+					<Snackbar autoHideDuration={5000} open={open} onClose={handleClose}>
+						<Alert severity="error">{props.errMessage}</Alert>
+					</Snackbar>					
+				}
 				<Routes>
 					<Route exact path="/" element={<Home tasks={props.tasks} createTask={props.postTask} removeTask={props.deleteTask} />} />
 					<Route path="/edit/:itemId" element={<EditWithID />} />

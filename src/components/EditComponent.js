@@ -1,36 +1,14 @@
 import React from "react";
-import { Container, Box, Table, TableBody, TableCell, TableHead, TableRow, TextField, TextareaAutosize, FormGroup, Stack, MenuItem, Button, Grid, Typography, Alert } from '@mui/material';
+import { Container, Box, Table, TableBody, TableCell, TableHead, TableRow, TextField, TextareaAutosize, MenuItem, Button, Grid, Typography, Alert, Snackbar } from '@mui/material';
 import { Link } from "react-router-dom";
 import { pink } from '@mui/material/colors';
 import { Home } from "@mui/icons-material";
-
-function UpdateMessage(props) {
-	const [alert, setAlert] = React.useState(true);
-
-	React.useEffect(() => {
-		// when the component is mounted, the alert is displayed for 3 seconds
-		setTimeout(() => {
-		  setAlert(false);
-		  props.updateComplete();
-		}, 3000);
-	}, []);
-
-	return (
-		<React.Fragment>
-		{
-			alert && 
-			<Box py={3}>
-				<Alert severity="success">
-					<strong>The task has been updated succesfully!</strong>
-				</Alert>
-			</Box>
-		}
-		</React.Fragment>
-	)
-}
+import Stopwatch from "./Stopwatch";
 
 function Edit(props) {
 	const [item, setItem] = React.useState();
+	const [open, setOpen] = React.useState(true);
+
 	const timeZoneOffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
 	const localISOTime = new Date(Date.now() - timeZoneOffset).toISOString().split('T')[0];
 
@@ -46,6 +24,10 @@ function Edit(props) {
 		}
 	}, []);
 
+	const handleClose = () => {
+		setOpen(false);
+	};
+
 	const handleChange = (event) => {
 		setItem((prevState) => ({
 			...prevState,
@@ -56,8 +38,17 @@ function Edit(props) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(item);
 		props.updateItem(props.task._id,item);
+	}
+
+	const handleStopwatchTimer = ( time ) => {
+		let hours = time / 60
+		let roundedHours = Math.ceil(hours * 4) / 4;
+		setItem((prevState) => ({
+			...prevState,
+			"hours": roundedHours
+			}
+		))
 	}
 
 	return(
@@ -71,7 +62,9 @@ function Edit(props) {
 					</Box>
 					{
 						props.taskUpdated &&
-						<UpdateMessage updateComplete={props.updateComplete}/>						
+						<Snackbar autoHideDuration={3000} open={open} onClose={handleClose}>
+							<Alert severity="success" variant="filled">The task has been updated succesfully!</Alert>
+						</Snackbar>					
 					}
 					<Box sx={{borderBottom: '1px solid white'}} py={1} mb={5}>
 						<Typography component="h3" variant="h4">Edit details of the entry: {props.task._id}</Typography>
@@ -88,10 +81,10 @@ function Edit(props) {
 						</TableHead>
 						<TableBody>
 							<TableRow key={item._id}>
-								<TableCell>{item.date.substring(0, 10)}</TableCell>
-								<TableCell>{item.task}</TableCell>
-								<TableCell>{item.hours}</TableCell>
-								<TableCell>{item.invoiced ? "yes" : "no"}</TableCell>
+								<TableCell>{props.task.date.substring(0, 10)}</TableCell>
+								<TableCell>{props.task.task}</TableCell>
+								<TableCell>{props.task.hours}</TableCell>
+								<TableCell>{props.task.invoiced ? "yes" : "no"}</TableCell>
 								<TableCell>{item._id}</TableCell>
 							</TableRow>
 						</TableBody>
@@ -200,6 +193,9 @@ function Edit(props) {
 									name="task"
 									onChange={handleChange}
 								/>
+							</Grid>
+							<Grid item xs={12}>
+								<Stopwatch timerAddition={handleStopwatchTimer} startingTime={item.hours}/>
 							</Grid>
 							<Grid item xs={12}>
 								<Button variant="contained" type="submit">Save</Button>
