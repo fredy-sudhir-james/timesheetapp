@@ -35,7 +35,6 @@ export const fetchTasks = () => (dispatch) => {
 	.then( response => response.json() )
 	.then( result => dispatch( addTasks(result) ) )
 	.catch( error => {
-		console.log(error);
 		dispatch( tasksFailed(error) );
 	});
 }
@@ -65,7 +64,6 @@ export const postTask = (newTask) => (dispatch) => {
 	.then( response => response.json() )
 	.then( result => dispatch( addNewTask(result) ) )
 	.catch( error => {
-		console.log( 'Adding new task failed ', error);
 		dispatch(tasksFailed(error.message));
 	});
 }
@@ -100,7 +98,6 @@ export const updateTasks = (id, newTasks) => (dispatch) => {
 		}
 	})
 	.catch( error => {
-		console.log( 'Update error', error);
 		dispatch(tasksFailed(error.message));
 	});
 }
@@ -127,11 +124,9 @@ export const deleteTask = (id) => (dispatch) => {
 	)
 	.then( response => response.json() )
 	.then ( result => {
-		console.log( 'Task deleted ', result );
 		dispatch(fetchTasks());
 	})
 	.catch( error => {
-		console.log( 'Task deletion failed ', error);
 		dispatch(tasksFailed(error.message));
 	});
 }
@@ -144,3 +139,76 @@ export const tasksFailed = (errmess) => ({
 	type: ActionTypes.TASKS_FAILED,
 	payload: errmess
 });
+
+export const getInvoices = (invoices) => ({
+	type: ActionTypes.GET_INVOICES,
+	payload: invoices
+});
+
+export const invoiceLoading = () => ({
+	type: ActionTypes.INVOICE_LOADING
+});
+
+export const fetchInvoices = () => (dispatch) => {
+	dispatch(invoiceLoading(true));
+	return fetch( baseUrl + 'allinvoice')
+	.then(response => {
+        if (response.ok) {
+            return response;
+        }
+        else {
+            var error = new Error('Error ' + response.status + ': ' + response.statusText);
+            error.response = response;
+            throw error;
+        }
+    })
+	.then( response => response.json() )
+	.then( result => dispatch( getInvoices(result.invoices) ) )
+	.catch( error => {
+		dispatch( invoiceFailed(error) );
+	});
+}
+
+export const invoiceFailed = (errmess) => ({
+	type: ActionTypes.INVOICE_FAILED,
+	payload: errmess
+});
+
+export const createInvoice = (rate) => (dispatch) => {
+	dispatch(invoiceLoading(true));
+	return fetch( baseUrl + 'allinvoice', {
+		method: 'POST',
+		body: JSON.stringify(rate),
+        headers: {
+          "Content-Type": "application/json"
+        },
+	})
+	.then(response => {
+		console.log('Response: ', response);
+			if ( response.ok ) {
+				return response;
+			} else {
+				var error = new Error('Error ' + response.status + ': ' + response.statusText);
+				error.response = response;
+				throw error;
+			}
+		},
+		error => {
+			throw error;
+		}
+	)
+	.then( response => response.json() )
+	.then( result => {
+			console.log('Result: ', result);
+			dispatch( addNewInvoice(result.inv) )
+		}
+	)
+	.catch( error => {
+		dispatch(invoiceFailed(error.message));
+	});
+}
+
+export const addNewInvoice = (invoice) => ({
+	type: ActionTypes.ADD_NEW_INVOICE,
+	payload: invoice
+})

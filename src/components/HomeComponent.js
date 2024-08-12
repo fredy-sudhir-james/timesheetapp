@@ -56,19 +56,30 @@ function Home(props) {
 	return(
 		<div className='app__body'>
 			<Box>
-				<Hours allTasks={props.tasks}/>
-				<p>Last invoice: </p>
+				<Grid container spacing={2}>
+					<Grid item xs={12} sm={6}>
+						<Box sx={ { bgcolor: 'common.white', p: 2, borderRadius: 2, boxShadow: 2 } }>
+							<Typography variant='h6' sx={ { fontWeight: 'bold' }}>Overview</Typography>
+							<Hours allTasks={ props.tasks } />
+							<p>Last invoice: </p>
+						</Box>
+					</Grid>
 
-				<AddNewTask createTask={props.createTask}/>
+					<Grid item xs={ 12 } sm={ 6 }>
+						<Box sx={ { bgcolor: 'common.white', p: 2, borderRadius: 2, boxShadow: 2, height: '100%' } }>
+							<Typography variant='h6' sx={ { fontWeight: 'bold', marginBottom: 2 } }>More Options</Typography>
+							<AddNewTask createTask={ props.createTask }/>
+						</Box>
+					</Grid>
+				</Grid>
+			</Box>
+			<Box sx={ { bgcolor: 'common.white', p: 2, borderRadius: 2, boxShadow: 2, marginTop: 3 } }>
+				<Typography variant='h5' sx={ { fontWeight: 'bold' } }>Recent Tasks</Typography>
 
-				<Box sx={{py: 2}}>
-					<Typography>Latest 10 tasks</Typography>
-				</Box>
-
-				<TableContainer>
+				<TableContainer sx={{ marginTop: 2 }}>
 					<Table>
 						<TableHead>
-							<TableRow sx={{ 'th': {color: 'white'}}}>
+							<TableRow>
 								<TableCell>Sl.no</TableCell>
 								<TableCell>Date</TableCell>
 								<TableCell>Task</TableCell>
@@ -77,11 +88,11 @@ function Home(props) {
 								<TableCell></TableCell>
 							</TableRow>
 						</TableHead>
-						<TableBody sx={{color: 'white'}}>
+						<TableBody>
 							{
 							props.tasks.slice(0, 10).map((task, index) => {
 								return(
-									<TableRow key={task._id} sx={{ 'td': {color: 'white'}}}>
+									<TableRow key={task._id}>
 										<TableCell>{index + 1}</TableCell>
 										<TableCell>{task.date.split('T')[0]}</TableCell>
 										<TableCell>{task.task}</TableCell>

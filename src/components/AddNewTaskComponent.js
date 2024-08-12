@@ -5,6 +5,7 @@ import Stopwatch from "./Stopwatch";
 
 function AddNewTask(props) {
 	const [open, setOpen] = React.useState(false);
+	const [errors, setErrors] = React.useState({});
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 	const timeZoneOffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
@@ -17,9 +18,34 @@ function AddNewTask(props) {
 			task: event.target.task.value,
 			hours: event.target.hours.value,
 		}
-		props.createTask(formData);
-		setOpen(false);
+		// Validate form data
+		const validationErrors = validateForm(formData);
+		if (Object.keys(validationErrors).length === 0) {
+			props.createTask(formData);
+			setOpen(false);
+			setErrors({});  // Clear any previous errors
+		} else {
+			setErrors(validationErrors);  // Set the validation errors to state
+		}
 	}
+
+	const validateForm = (data) => {
+		const validationErrors = {};
+	
+		if (!data.date) {
+			validationErrors.date = "Date is required";
+		}
+	
+		if (!data.task.trim()) {
+			validationErrors.task = "Task description is required";
+		}
+	
+		if (data.hours <= 0) {
+			validationErrors.hours = "Hours should be greater than 0";
+		}
+	
+		return validationErrors;
+	};
 
 	const handleStopwatchTimer = ( time ) => {
 		let hours = time / 60
@@ -72,8 +98,11 @@ function AddNewTask(props) {
 								shrink: true,
 							}}
 							defaultValue={localISOTime}
+							error={!!errors.date}
 						/>
 						<TextareaAutosize
+							required
+							label="Task description"
 							aria-label="Task description"
 							minRows={4}
 							placeholder="Add task description"
@@ -82,7 +111,9 @@ function AddNewTask(props) {
 								padding: '10px',
 							}}
 						/>
+						{errors.task && <Typography variant="body2" color="error">{errors.task}</Typography>}
 						<TextField
+							required
 							id="hours"
 							label="Hours"
 							type="number"
@@ -93,6 +124,7 @@ function AddNewTask(props) {
 							helperText="Add in increments of 0.25"
 							name="hours"
 							defaultValue={0}
+							error={!!errors.hours}
 							>
 						</TextField>
 						<Stopwatch timerAddition={handleStopwatchTimer}/>
